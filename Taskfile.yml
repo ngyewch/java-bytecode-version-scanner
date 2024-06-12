@@ -1,0 +1,28 @@
+version: 3
+
+tasks:
+  clean:
+    desc: Clean
+    cmds:
+      - rm -rf dist
+
+  build:
+    desc: Build
+    cmds:
+      - goreleaser build --snapshot --clean
+
+  build-single:
+    desc: Build (single)
+    cmds:
+    - goreleaser build --snapshot --clean --single-target --output dist/mesn-cli
+
+  build-via-earthly:
+    cmds:
+      - eval `go-versioninfo env --git-describe-mode semver` && earthly --artifact +build/dist/* dist/output/ --VERSION=$VERSION --COMMIT=$COMMIT --COMMIT_TIMESTAMP=$COMMIT_TIMESTAMP
+
+  dependencyUpdates:
+    desc: Show dependency updates
+    cmds:
+      - go mod download
+      - go mod tidy
+      - go list -u -m -json all | go-mod-outdated -update -direct
